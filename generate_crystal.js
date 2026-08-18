@@ -28,7 +28,11 @@ function buildEndCrystalModel() {
     indices.push(baseIdx, baseIdx + 2, baseIdx + 3);
   }
 
-  function addBox(minX, minY, minZ, maxX, maxY, maxZ, rotMatrix, thick, ao) {
+  function addBox(minX, minY, minZ, maxX, maxY, maxZ, rotMatrix, thick, ao, uvRect) {
+    const u0 = uvRect ? uvRect[0] : 0.0;
+    const v0 = uvRect ? uvRect[1] : 0.0;
+    const u1 = uvRect ? uvRect[2] : 1.0;
+    const v1 = uvRect ? uvRect[3] : 1.0;
     if (thick === undefined) thick = 0.3;
     if (ao === undefined) ao = 1.0;
     const transform = (p) => {
@@ -50,37 +54,37 @@ function buildEndCrystalModel() {
     addQuad(
       transform([minX, minY, maxZ]), transform([maxX, minY, maxZ]),
       transform([maxX, maxY, maxZ]), transform([minX, maxY, maxZ]),
-      transformNorm([0, 0, 1]), [0, 0], [1, 0], [1, 1], [0, 1], thick, ao
+      transformNorm([0, 0, 1]), [u0, v0], [u1, v0], [u1, v1], [u0, v1], thick, ao
     );
     // -Z (back)
     addQuad(
       transform([maxX, minY, minZ]), transform([minX, minY, minZ]),
       transform([minX, maxY, minZ]), transform([maxX, maxY, minZ]),
-      transformNorm([0, 0, -1]), [0, 0], [1, 0], [1, 1], [0, 1], thick, ao
+      transformNorm([0, 0, -1]), [u0, v0], [u1, v0], [u1, v1], [u0, v1], thick, ao
     );
     // +Y (top)
     addQuad(
       transform([minX, maxY, maxZ]), transform([maxX, maxY, maxZ]),
       transform([maxX, maxY, minZ]), transform([minX, maxY, minZ]),
-      transformNorm([0, 1, 0]), [0, 0], [1, 0], [1, 1], [0, 1], thick, ao
+      transformNorm([0, 1, 0]), [u0, v0], [u1, v0], [u1, v1], [u0, v1], thick, ao
     );
     // -Y (bottom)
     addQuad(
       transform([minX, minY, minZ]), transform([maxX, minY, minZ]),
       transform([maxX, minY, maxZ]), transform([minX, minY, maxZ]),
-      transformNorm([0, -1, 0]), [0, 0], [1, 0], [1, 1], [0, 1], thick, ao
+      transformNorm([0, -1, 0]), [u0, v0], [u1, v0], [u1, v1], [u0, v1], thick, ao
     );
     // +X (right)
     addQuad(
       transform([maxX, minY, maxZ]), transform([maxX, minY, minZ]),
       transform([maxX, maxY, minZ]), transform([maxX, maxY, maxZ]),
-      transformNorm([1, 0, 0]), [0, 0], [1, 0], [1, 1], [0, 1], thick, ao
+      transformNorm([1, 0, 0]), [u0, v0], [u1, v0], [u1, v1], [u0, v1], thick, ao
     );
     // -X (left)
     addQuad(
       transform([minX, minY, minZ]), transform([minX, minY, maxZ]),
       transform([minX, maxY, maxZ]), transform([minX, maxY, minZ]),
-      transformNorm([-1, 0, 0]), [0, 0], [1, 0], [1, 1], [0, 1], thick, ao
+      transformNorm([-1, 0, 0]), [u0, v0], [u1, v0], [u1, v1], [u0, v1], thick, ao
     );
   }
 
@@ -109,21 +113,22 @@ function buildEndCrystalModel() {
   function buildNotchedCubeFrame(size, beamW, rotMat, thick, ao) {
     const s = size / 2;
     const b = beamW;
+    const glassUV = [32/128, 0/64, 64/128, 32/64];
     // 12 outer beams
-    addBox(-s, -s, -s, -s+b, -s+b, s, rotMat, thick, ao);
-    addBox(s-b, -s, -s, s, -s+b, s, rotMat, thick, ao);
-    addBox(-s, s-b, -s, -s+b, s, s, rotMat, thick, ao);
-    addBox(s-b, s-b, -s, s, s, s, rotMat, thick, ao);
+    addBox(-s, -s, -s, -s+b, -s+b, s, rotMat, thick, ao, glassUV);
+    addBox(s-b, -s, -s, s, -s+b, s, rotMat, thick, ao, glassUV);
+    addBox(-s, s-b, -s, -s+b, s, s, rotMat, thick, ao, glassUV);
+    addBox(s-b, s-b, -s, s, s, s, rotMat, thick, ao, glassUV);
 
-    addBox(-s, -s+b, -s, -s+b, s-b, -s+b, rotMat, thick, ao);
-    addBox(s-b, -s+b, -s, s, s-b, -s+b, rotMat, thick, ao);
-    addBox(-s, -s+b, s-b, -s+b, s-b, s, rotMat, thick, ao);
-    addBox(s-b, -s+b, s-b, s, s-b, s, rotMat, thick, ao);
+    addBox(-s, -s+b, -s, -s+b, s-b, -s+b, rotMat, thick, ao, glassUV);
+    addBox(s-b, -s+b, -s, s, s-b, -s+b, rotMat, thick, ao, glassUV);
+    addBox(-s, -s+b, s-b, -s+b, s-b, s, rotMat, thick, ao, glassUV);
+    addBox(s-b, -s+b, s-b, s, s-b, s, rotMat, thick, ao, glassUV);
 
-    addBox(-s+b, -s, -s, s-b, -s+b, -s+b, rotMat, thick, ao);
-    addBox(-s+b, s-b, -s, s-b, s, -s+b, rotMat, thick, ao);
-    addBox(-s+b, -s, s-b, s-b, -s+b, s, rotMat, thick, ao);
-    addBox(-s+b, s-b, s-b, s-b, s, s, rotMat, thick, ao);
+    addBox(-s+b, -s, -s, s-b, -s+b, -s+b, rotMat, thick, ao, glassUV);
+    addBox(-s+b, s-b, -s, s-b, s, -s+b, rotMat, thick, ao, glassUV);
+    addBox(-s+b, -s, s-b, s-b, -s+b, s, rotMat, thick, ao, glassUV);
+    addBox(-s+b, s-b, s-b, s-b, s, s, rotMat, thick, ao, glassUV);
 
     // Minecraft end crystal tooth pattern on all faces (notched pixel pattern)
     const toothSize = b * 0.9;
@@ -133,21 +138,21 @@ function buildEndCrystalModel() {
       if (i % 2 === 1) {
         const offset = -s + b + (i / (count + 1)) * (size - 2*b);
         // Face +/- Z
-        addBox(offset - toothSize/2, s - b - toothDepth, s - b, offset + toothSize/2, s - b, s, rotMat, thick, ao);
-        addBox(offset - toothSize/2, -s + b, s - b, offset + toothSize/2, -s + b + toothDepth, s, rotMat, thick, ao);
-        addBox(-s, offset - toothSize/2, s - b, -s + b + toothDepth, offset + toothSize/2, s, rotMat, thick, ao);
-        addBox(s - b - toothDepth, offset - toothSize/2, s - b, s, offset + toothSize/2, s, rotMat, thick, ao);
+        addBox(offset - toothSize/2, s - b - toothDepth, s - b, offset + toothSize/2, s - b, s, rotMat, thick, ao, glassUV);
+        addBox(offset - toothSize/2, -s + b, s - b, offset + toothSize/2, -s + b + toothDepth, s, rotMat, thick, ao, glassUV);
+        addBox(-s, offset - toothSize/2, s - b, -s + b + toothDepth, offset + toothSize/2, s, rotMat, thick, ao, glassUV);
+        addBox(s - b - toothDepth, offset - toothSize/2, s - b, s, offset + toothSize/2, s, rotMat, thick, ao, glassUV);
 
-        addBox(offset - toothSize/2, s - b - toothDepth, -s, offset + toothSize/2, s - b, -s + b, rotMat, thick, ao);
-        addBox(offset - toothSize/2, -s + b, -s, offset + toothSize/2, -s + b + toothDepth, -s + b, rotMat, thick, ao);
-        addBox(-s, offset - toothSize/2, -s, -s + b + toothDepth, offset + toothSize/2, -s + b, rotMat, thick, ao);
-        addBox(s - b - toothDepth, offset - toothSize/2, -s, s, offset + toothSize/2, -s + b, rotMat, thick, ao);
+        addBox(offset - toothSize/2, s - b - toothDepth, -s, offset + toothSize/2, s - b, -s + b, rotMat, thick, ao, glassUV);
+        addBox(offset - toothSize/2, -s + b, -s, offset + toothSize/2, -s + b + toothDepth, -s + b, rotMat, thick, ao, glassUV);
+        addBox(-s, offset - toothSize/2, -s, -s + b + toothDepth, offset + toothSize/2, -s + b, rotMat, thick, ao, glassUV);
+        addBox(s - b - toothDepth, offset - toothSize/2, -s, s, offset + toothSize/2, -s + b, rotMat, thick, ao, glassUV);
 
         // Face +/- X
-        addBox(s - b, offset - toothSize/2, s - b - toothDepth, s, offset + toothSize/2, s - b, rotMat, thick, ao);
-        addBox(s - b, offset - toothSize/2, -s + b, s, offset + toothSize/2, -s + b + toothDepth, rotMat, thick, ao);
-        addBox(-s, offset - toothSize/2, s - b - toothDepth, -s + b, offset + toothSize/2, s - b, rotMat, thick, ao);
-        addBox(-s, offset - toothSize/2, -s + b, -s + b, offset + toothSize/2, -s + b + toothDepth, rotMat, thick, ao);
+        addBox(s - b, offset - toothSize/2, s - b - toothDepth, s, offset + toothSize/2, s - b, rotMat, thick, ao, glassUV);
+        addBox(s - b, offset - toothSize/2, -s + b, s, offset + toothSize/2, -s + b + toothDepth, rotMat, thick, ao, glassUV);
+        addBox(-s, offset - toothSize/2, s - b - toothDepth, -s + b, offset + toothSize/2, s - b, rotMat, thick, ao, glassUV);
+        addBox(-s, offset - toothSize/2, -s + b, -s + b, offset + toothSize/2, -s + b + toothDepth, rotMat, thick, ao, glassUV);
       }
     }
   }
@@ -166,14 +171,16 @@ function buildEndCrystalModel() {
   const rotMiddle = getRotationMatrix([0, 1, 0], Math.PI / 4);
   buildNotchedCubeFrame(1.1, 0.09, rotMiddle, 0.3, 0.85);
 
-  // 4. Central Glowing Crystal Core
-  const coreSize = 0.6;
+  // 4. Central Glowing Crystal Core (Single solid geometric crystal core, precisely scaled and rotated without protrusion)
+  const coreSize = 0.52;
   const rotCore = multMatrix(getRotationMatrix([1, 0, 1].map(v => v/Math.SQRT2), Math.PI/4), getRotationMatrix([0, 1, 0], Math.PI/4));
-  addBox(-coreSize/2, -coreSize/2, -coreSize/2, coreSize/2, coreSize/2, coreSize/2, rotCore, 0.95, 1.0);
+  const coreUV = [0/128, 0/64, 32/128, 32/64];
+  addBox(-coreSize/2, -coreSize/2, -coreSize/2, coreSize/2, coreSize/2, coreSize/2, rotCore, 0.95, 1.0, coreUV);
 
-  // 5. Inner Core Rune Beacon
-  const nucSize = 0.38;
-  addBox(-nucSize/2, -nucSize/2, -nucSize/2, nucSize/2, nucSize/2, nucSize/2, null, 1.0, 1.0);
+  // 5. Inner Core Concentric Rune Beacon (Sharing same rotation axis to prevent any corner sticking out)
+  const nucSize = 0.36;
+  const nucUV = [0/128, 0/64, 16/128, 16/64];
+  addBox(-nucSize/2, -nucSize/2, -nucSize/2, nucSize/2, nucSize/2, nucSize/2, rotCore, 1.0, 1.0, nucUV);
 
   // Package into .buf format
   const vCount = positions.length / 3;
@@ -185,6 +192,7 @@ function buildEndCrystalModel() {
     attributes: [
       { id: 'daoN', needsPack: false, componentSize: 3, storageType: 'Float32Array' },
       { id: 'normal', needsPack: false, componentSize: 3, storageType: 'Float32Array' },
+      { id: 'uv', needsPack: false, componentSize: 2, storageType: 'Float32Array' },
       {
         id: 'SN',
         needsPack: true,
@@ -236,6 +244,7 @@ function buildEndCrystalModel() {
   // Binary buffers
   const daoNArr = new Float32Array(daoNs);
   const normalArr = new Float32Array(normals);
+  const uvArr = new Float32Array(uvs);
   
   // SN: Int16Array
   const snArr = new Int16Array(vCount * 3);
@@ -278,6 +287,7 @@ function buildEndCrystalModel() {
     headerBuf,
     Buffer.from(daoNArr.buffer),
     Buffer.from(normalArr.buffer),
+    Buffer.from(uvArr.buffer),
     Buffer.from(snArr.buffer),
     Buffer.from(aoArr.buffer),
     Buffer.from(daoPArr.buffer),
