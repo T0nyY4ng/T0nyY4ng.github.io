@@ -225,8 +225,12 @@ function buildEndCrystalModel() {
     meshType: 'Mesh'
   };
 
-  const headerJson = JSON.stringify(header);
-  const headerBuf = Buffer.from(headerJson, 'utf8');
+  let headerJson = JSON.stringify(header);
+  let headerBuf = Buffer.from(headerJson, 'utf8');
+  while ((4 + headerBuf.length) % 4 !== 0) {
+    headerJson += ' ';
+    headerBuf = Buffer.from(headerJson, 'utf8');
+  }
   const headerLen = headerBuf.length;
 
   // Binary buffers
